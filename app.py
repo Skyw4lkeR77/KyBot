@@ -117,7 +117,7 @@ def home():
     """Menampilkan halaman utama dengan riwayat chat pengguna."""
     session_id = dapatkan_session_id()
     history = ambil_riwayat_chat(session_id)
-    return render_template('index.html', ai_name="KyBot v1.0", creator="Mr. kypau", ai_image_url="/static/kybot_image.webp", chat_history=history)
+    return render_template('index.html', ai_name="KyBot v1.0", creator="Mr. kypau", chat_history=history)
 
 @app.route('/chat', methods=['POST'])
 def chat():
