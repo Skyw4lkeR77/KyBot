@@ -144,6 +144,3 @@ def new_chat():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-# Hak Cipta (C) 2025 Mr. Kypau. Semua hak dilindungi undang-undang.
-# Skrip ini adalah milik eksklusif Mr. Kypau dan tidak boleh digunakan tanpa izin.
