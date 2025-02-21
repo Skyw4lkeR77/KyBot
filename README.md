@@ -4,6 +4,8 @@
 
 KyBot v1.0 adalah chatbot berbasis AI yang menggunakan model **llama-3.3-70b-versatile** dari **Groq API**. Chatbot ini dapat menyimpan riwayat percakapan pengguna dan memberikan pengalaman chatting yang interaktif serta responsif.
 
+DEMO : **https://awake-gentleness-staging.up.railway.app/**
+
 ## 🚀 Fitur
 
 - **Chatbot interaktif dengan AI** (Model: llama-3.3-70b-versatile)
@@ -67,19 +69,37 @@ SECRET_KEY=your_secret_key
 
 Sekarang, buka [**http://127.0.0.1:5000**](http://127.0.0.1:5000) di browser untuk mulai menggunakan KyBot!
 
-## 🌍 Deployment
+## 🌍 **Cara Deploy KyBot ke Railway**
 
-Untuk hosting gratis, kamu bisa menggunakan **Render** atau **Railway**:
+### **1️⃣ Buat Akun di Railway**
+1. **Buka** [Railway.app](https://railway.app/)  
+2. **Login dengan GitHub**  
 
-1. **Deploy ke Render**
+### **2️⃣ Hubungkan Repo GitHub ke Railway**
+1. **Klik `New Project`** → `Deploy from GitHub Repo`
+2. **Pilih repo `kybot`** → Klik **Deploy**
 
-   - Buat akun di [Render](https://render.com/)
-   - Tambahkan repo GitHub dan deploy sebagai **Web Service**
+### **3️⃣ Tambahkan Environment Variables**
+1. **Buka `Settings` → `Environment Variables`**
+2. **Tambahkan variabel berikut:**
+   ```
+   PORT = 5000
+   GROQ_API_KEY = your_api_key_here
+   SECRET_KEY = your_secret_key
+   ```
+3. **Simpan & Redeploy**
 
-2. **Deploy ke Railway**
+### **4️⃣ Gunakan Gunicorn untuk Stabilitas**
+- **Edit `Start Command` di Railway (`Settings` → `Deployments`)**:
+  ```sh
+  gunicorn -w 4 -b 0.0.0.0:$PORT app:app
+  ```
+- **Redeploy untuk menerapkan perubahan**
 
-   - Buat akun di [Railway](https://railway.app/)
-   - Tambahkan repo GitHub dan atur **environment variables**
+### **5️⃣ Akses KyBot di Railway**
+1. **Buka Railway → Tab `Settings` → `Domains`**
+2. **Salin URL** (contoh: `https://kybot-production.up.railway.app/`)
+3. **Buka di browser, dan KyBot siap digunakan!** 
 
 ---
 
