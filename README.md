@@ -4,7 +4,7 @@
 
 KyBot v1.0 adalah chatbot berbasis AI yang menggunakan model **llama-3.3-70b-versatile** dari **Groq API**. Chatbot ini dapat menyimpan riwayat percakapan pengguna dan memberikan pengalaman chatting yang interaktif serta responsif.
 
-DEMO : **https://awake-gentleness-staging.up.railway.app/**
+DEMO : **https://kybot.up.railway.app/**
 
 ## 🚀 Fitur
 
