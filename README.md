@@ -103,5 +103,5 @@ Sekarang, buka [**http://127.0.0.1:5000**](http://127.0.0.1:5000) di browser unt
 
 ---
 
-🔥 **KyBot v1.0 - Smart AI Chatbot for Everyone!** 🔥
+# Cuma proyek iseng-iseng :v
 
