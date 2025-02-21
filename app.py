@@ -5,7 +5,6 @@ from flask import Flask, render_template, request, jsonify, session
 from groq import Groq
 from dotenv import load_dotenv
 
-# Tampilkan teks ASCII KyBot saat aplikasi dijalankan
 ascii_art = """
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░ ░▒▓██████▓▒░▒▓████████▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░     
