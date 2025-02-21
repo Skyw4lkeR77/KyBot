@@ -69,6 +69,7 @@ SECRET_KEY=your_secret_key
 
 Sekarang, buka [**http://127.0.0.1:5000**](http://127.0.0.1:5000) di browser untuk mulai menggunakan KyBot!
 
+
 ## 🌍 **Cara Deploy KyBot ke Railway**
 
 ### **1️⃣ Buat Akun di Railway**
