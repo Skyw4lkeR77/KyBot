@@ -38,12 +38,12 @@ ascii_art = """
 
 ==================================================================
 =                  Creator: Mr. kypau                            =
-=                  versi  : 1.0                                  =
+=                  versi  : 9.0                                  =
 =                  GitHub : github.com/Skyw4lkeR77               =
 ==================================================================
 """
 print(ascii_art)
-logger.info("KyBot v1.0 started")
+logger.info("KyBot v9.0 started")
 
 load_dotenv()
 
@@ -148,7 +148,7 @@ def kirim_ke_ai(pesan, session_id, deep_search=False, browser_history=None):
     waktu = now.strftime("%d %B %Y, pukul %H:%M WIB")
 
     messages = [
-        {"role": "system", "content": f"Kamu adalah KyBot v1.0, AI yang dibuat oleh Mr. Kypau. Jawab dengan relevan dan profesional dalam bahasa Indonesia menggunakan format Markdown. Hari ini adalah {hari_indo}, {waktu}."}
+        {"role": "system", "content": f"Kamu adalah KyBot v9.0, AI yang dibuat oleh Mr. Kypau. Jawab dengan relevan dan profesional dalam bahasa Indonesia menggunakan format Markdown. Hari ini adalah {hari_indo}, {waktu}."}
     ]
     
     if browser_history:
@@ -213,7 +213,7 @@ def home():
         session_id = dapatkan_session_id()
         history = ambil_riwayat_chat(session_id)
         logger.debug(f"Home page accessed for session {session_id}")
-        return render_template('index.html', ai_name="KyBot v1.0", creator="Mr. Kypau", chat_history=history)
+        return render_template('index.html', ai_name="KyBot v9.0", creator="Mr. Kypau", chat_history=history)
     except Exception as e:
         logger.error(f"Home endpoint error: {str(e)}")
         return "Error loading page", 500
