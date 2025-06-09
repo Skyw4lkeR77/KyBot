@@ -1,168 +1,517 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KyBot v1.0 - AI Chat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>KyBot v1.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            color: #1f2937;
+            background-color: #ffffff;
+            transition: background-color 0.3s, color 0.3s;
         }
-        .chat-container {
-            width: 90%;
-            max-width: 400px;
-            height: 80vh;
-            background: #2e2e2e;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+
+        body.dark-mode {
+            color: #e5e7eb;
+            background-color: #1f2937;
         }
-        .header {
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            background: #333;
-            border-bottom: 1px solid #444;
+            margin-bottom: 20px;
         }
-        .header h2 {
-            margin: 0;
-            font-size: 16px;
+
+        h1 {
+            font-size: 24px;
         }
-        .new-chat-btn {
-            background: #ff4444;
+
+        .theme-button {
+            padding: 8px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
             border: none;
-            padding: 5px 10px;
-            border-radius: 10px;
             cursor: pointer;
-            color: white;
-            font-size: 12px;
+            transition: background-color 0.3s;
         }
-        .chat-box {
+
+        .dark-mode .theme-button {
+            background-color: #374151;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
             flex: 1;
             padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .dark-mode .search-bar input {
+            border-color: #4b5563;
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+
+        .search-bar button, .button-group button {
+            padding: 10px 20px;
+            background-color: #3b82f6;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-bar button:hover, .button-group button:hover {
+            background-color: #2563eb;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .deep-search {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .deep-search label {
+            font-size: 14px;
+        }
+
+        .chat-area {
+            min-height: 180px;
+            max-height: 400px;
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
+            padding: 20px;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
-        .input-container {
-            display: flex;
+
+        .dark-mode .chat-area {
+            background-color: #374151;
+            border-color: #4b5563;
+        }
+
+        .message {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            max-width: 85%;
+            word-wrap: break-word;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+
+        .message ul {
+            margin-left: 1em;
+            padding-left: 1em;
+        }
+
+        .message ol {
+            margin-left: 1em;
+            padding-left: 1.5em;
+        }
+
+        .user-message {
+            background-color: #bfdbfe;
+            margin-left: auto;
+        }
+
+        .dark-mode .user-message {
+            background-color: #1e40af;
+        }
+
+        .bot-message {
+            background-color: #e5e7eb;
+            margin-right: auto;
+        }
+
+        .dark-mode .bot-message {
+            background-color: #4b5563;
+        }
+
+        .markdown-content pre code {
+            display: block;
+            background-color: #000000;
+            color: #ffffff;
             padding: 10px;
-            background: #333;
-            border-top: 1px solid #444;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
         }
-        input {
+
+        .markdown-content code {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .dark-mode .markdown-content code {
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .input-area textarea {
             flex: 1;
             padding: 10px;
-            border: none;
-            border-radius: 20px;
-            outline: none;
-            background: #555;
-            color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            resize: vertical;
+            min-height: 40px;
+            max-height: 80px;
+            font-size: 14px;
         }
-        button {
-            background: #0084FF;
-            color: white;
+
+        .dark-mode .input-area textarea {
+            border-color: #4b5563;
+            background-color: #374151;
+            color: #e5e7eb;
+        }
+
+        .input-area button {
+            width: 40px;
+            height: 40px;
+            background-color: #3b82f6;
             border: none;
-            padding: 10px;
-            margin-left: 5px;
-            border-radius: 20px;
+            border-radius: 8px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, opacity 0.3s;
         }
-        .message {
-            padding: 10px;
-            border-radius: 20px;
-            margin: 5px;
-            max-width: 80%;
-            word-wrap: break-word;
-            animation: fadeIn 0.3s ease-in-out;
+
+        .input-area button:hover {
+            background-color: #2563eb;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .input-area button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
-        .user {
-            background: #0084FF;
-            color: white;
-            align-self: flex-end;
+
+        .send-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
         }
-        .bot {
-            background: #444;
-            color: white;
-            align-self: flex-start;
+
+        .spinner {
+            display: none;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
         }
-        .footer {
+
+        .sending .send-icon {
+            display: none;
+        }
+
+        .sending .spinner {
+            display: inline-block;
+        }
+
+        footer {
             text-align: center;
-            font-size: 12px;
-            padding: 10px;
-            color: gray;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            color: #ffffff;
+            z-index: 1000;
+        }
+
+        .notification.error {
+            background-color: #ef4444;
+        }
+
+        .notification.success {
+            background-color: #10b981;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .dark-mode .no-results {
+            color: #9ca3af;
+        }
+
+        mark {
+            background-color: #fef08a;
+            color: #1f2937;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
+    <!-- HTML dan JavaScript akan dilanjutkan di bawah ini -->
 <body>
-    <div class="chat-container">
-        <div class="header">
-            <h2>KyBot v1.0</h2>
-            <button class="new-chat-btn" onclick="newChat()">New Chat</button>
+    <div class="container">
+        <header>
+            <h1>KyBot v1.0</h1>
+            <button onclick="toggleTheme()" class="theme-button">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </header>
+        <div class="search-bar">
+            <input id="search-query" type="text" placeholder="Cari teks di chat...">
+            <button onclick="searchText()">Cari</button>
+            <button onclick="clearSearch()">Clear</button>
         </div>
-        <div class="chat-box" id="chat-box">
-            {% for user_message, bot_response in chat_history %}
-                <div class="message user">{{ user_message }}</div>
-                <div class="message bot">{{ bot_response }}</div>
-            {% endfor %}
+        <div class="button-group">
+            <button onclick="newChat()">New Chat</button>
+            <button onclick="exportChat()">Export Chat</button>
         </div>
-        <div class="input-container">
-            <input type="text" id="user-input" placeholder="Type a message...">
-            <button onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
+        <div class="deep-search">
+            <input type="checkbox" id="deep-search">
+            <label for="deep-search">Aktifkan DeepSearch Mode</label>
         </div>
+        <div id="chat-area" class="chat-area"></div>
+        <div class="input-area">
+            <textarea id="message" placeholder="Ketik pesan Anda..." rows="2"></textarea>
+            <button id="send-button" onclick="sendMessage()">
+                <span class="send-icon" data-feather="send"></span>
+                <span class="spinner"></span>
+            </button>
+        </div>
+        <div id="feedback-form" style="margin-top:20px; display:none;">
+            <h4>Beri Umpan Balik</h4>
+            <textarea id="feedback" placeholder="Bagaimana menurut Anda jawaban AI ini?" rows="2" style="width:100%; padding:10px; border-radius:6px; margin-bottom:10px;"></textarea>
+            <button onclick="submitFeedback()" style="padding:8px 16px; background:#10b981; color:white; border:none; border-radius:6px; cursor:pointer;">Kirim Umpan Balik</button>
+        </div>
+        <footer>Created by Mr. Kypau</footer>
     </div>
-    <div class="footer">Created by Mr. Kypau</div>
+
     <script>
-        function sendMessage() {
-            let input = document.getElementById("user-input");
-            let message = input.value.trim();
-            if (message === "") return;
+        feather.replace();
+        let chatHistory = [];
 
-            let chatBox = document.getElementById("chat-box");
-            let userMessage = document.createElement("div");
-            userMessage.className = "message user";
-            userMessage.textContent = message;
-            chatBox.appendChild(userMessage);
-            input.value = "";
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeIcon = document.getElementById('theme-icon');
+            const useDark = window.matchMedia("(prefers-color-scheme: dark)");
+            let darkModeState = useDark.matches;
 
-            fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: message })
-            })
-            .then(response => response.json())
-            .then(data => {
-                let botMessage = document.createElement("div");
-                botMessage.className = "message bot";
-                botMessage.textContent = data.response;
-                chatBox.appendChild(botMessage);
-                chatBox.scrollTop = chatBox.scrollHeight;
+            function toggleDarkMode(state) {
+                document.body.classList.toggle('dark-mode', state);
+                localStorage.setItem('theme', state ? 'dark' : 'light');
+                if (themeIcon) themeIcon.innerHTML = state ? '☀️' : '🌙';
+            }
+
+            useDark.addEventListener('change', evt => {
+                darkModeState = evt.matches;
+                toggleDarkMode(darkModeState);
             });
+
+            const savedTheme = localStorage.getItem('theme');
+            darkModeState = savedTheme === 'dark' || (!savedTheme && useDark.matches);
+            toggleDarkMode(darkModeState);
+        });
+
+        function toggleTheme() {
+            const isDark = !document.body.classList.contains('dark-mode');
+            document.body.classList.toggle('dark-mode', isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) themeIcon.innerHTML = isDark ? '☀️' : '🌙';
         }
 
-        function newChat() {
-            fetch("/new_chat", { method: "POST" })
-            .then(response => response.json())
-            .then(() => {
-                document.getElementById("chat-box").innerHTML = "";
+        async function sendMessage() {
+            const messageInput = document.getElementById('message');
+            const sendButton = document.getElementById('send-button');
+            const deepSearchCheckbox = document.getElementById('deep-search');
+            const message = messageInput.value.trim();
+            if (!message) return showNotification('Pesan tidak boleh kosong.', 'error');
+
+            sendButton.disabled = true;
+            sendButton.classList.add('sending');
+            addMessage(message, 'user');
+            chatHistory.push({ role: 'user', content: message });
+            messageInput.value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message,
+                        deep_search: deepSearchCheckbox.checked,
+                        history: chatHistory
+                    })
+                });
+                const data = await response.json();
+                if (data.response) {
+                    addMessage(data.response, 'bot');
+                    chatHistory.push({ role: 'bot', content: data.response });
+                    document.getElementById('feedback-form').style.display = 'block';
+                } else {
+                    showNotification('Gagal mendapatkan respons dari server.', 'error');
+                }
+            } catch (error) {
+                showNotification('Terjadi kesalahan: ' + error.message, 'error');
+            } finally {
+                sendButton.disabled = false;
+                sendButton.classList.remove('sending');
+            }
+        }
+
+        function addMessage(text, sender) {
+            const chatArea = document.getElementById('chat-area');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender === 'user' ? 'user-message' : 'bot-message'}`;
+            messageDiv.setAttribute('data-original', text);
+            messageDiv.innerHTML = sender === 'bot'
+                ? `<div class="markdown-content">${marked.parse(text)}</div>`
+                : text.replace(/\n/g, '<br>');
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function submitFeedback() {
+            const feedback = document.getElementById('feedback').value.trim();
+            if (!feedback) return showNotification('Umpan balik tidak boleh kosong.', 'error');
+
+            fetch('/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ feedback, history: chatHistory })
+            })
+            .then(res => res.json())
+            .then(data => {
+                showNotification('Umpan balik dikirim. Terima kasih!', 'success');
+                document.getElementById('feedback-form').style.display = 'none';
+                document.getElementById('feedback').value = '';
+            })
+            .catch(err => showNotification('Gagal mengirim umpan balik.', 'error'));
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        async function newChat() {
+            chatHistory = [];
+            document.getElementById('chat-area').innerHTML = '';
+            document.getElementById('feedback-form').style.display = 'none';
+        }
+
+        function searchText() {
+            const query = document.getElementById('search-query').value.trim();
+            if (!query) return showNotification('Kata kunci pencarian tidak boleh kosong.', 'error');
+
+            const chatArea = document.getElementById('chat-area');
+            const messages = chatArea.querySelectorAll('.message');
+            let found = false;
+
+            messages.forEach(message => {
+                const originalText = message.getAttribute('data-original');
+                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                const highlightedText = originalText.replace(regex, '<mark>$1</mark>');
+                if (highlightedText !== originalText) {
+                    found = true;
+                    message.innerHTML = message.classList.contains('bot-message')
+                        ? `<div class="markdown-content">${marked.parse(highlightedText)}</div>`
+                        : highlightedText;
+                } else {
+                    message.innerHTML = message.classList.contains('bot-message')
+                        ? `<div class="markdown-content">${marked.parse(originalText)}</div>`
+                        : originalText;
+                }
             });
+
+            if (!found) showNotification('Tidak ada teks ditemukan.', 'error');
+        }
+
+        function clearSearch() {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(message => {
+                const originalText = message.getAttribute('data-original');
+                message.innerHTML = message.classList.contains('bot-message')
+                    ? `<div class="markdown-content">${marked.parse(originalText)}</div>`
+                    : originalText;
+            });
+            document.getElementById('search-query').value = '';
+        }
+
+        function exportChat() {
+            let chatContent = '';
+            chatHistory.forEach(entry => {
+                chatContent += `${entry.role === 'user' ? 'User' : 'Bot'}: ${entry.content}\n---\n`;
+            });
+
+            if (!chatContent) return showNotification('Tidak ada riwayat chat untuk diekspor.', 'error');
+
+            const blob = new Blob([chatContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `KyBot_Chat_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Riwayat chat berhasil diekspor.', 'success');
         }
     </script>
 </body>
