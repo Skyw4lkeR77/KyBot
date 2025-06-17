@@ -1,6 +1,6 @@
-# KyBot v9.0 - AI Chatbot
+# KyBot v10.0 - AI Chatbot
 
-KyBot v9.0 adalah chatbot berbasis AI yang menggunakan model **llama-3.3-70b-versatile** dari **Groq API**. Chatbot ini mendukung riwayat percakapan, fitur DeepSearch untuk pencarian web, dan antarmuka pengguna yang modern serta responsif.
+KyBot v10.0 adalah chatbot berbasis AI yang memanfaatkan model llama-3.3-70b-versatile dari Groq API dan Gemini API untuk pembuatan dan pengeditan gambar. Chatbot ini menawarkan percakapan interaktif, penyimpanan riwayat obrolan, kemampuan bermain peran, serta fitur pembuatan gambar. Dirancang untuk responsif, ramah pengguna, dan sangat dapat disesuaikan.
 
 DEMO: **https://kybot.up.railway.app/**
 
@@ -8,10 +8,12 @@ DEMO: **https://kybot.up.railway.app/**
 
 - **Chatbot interaktif dengan AI** (Model: llama-3.3-70b-versatile)
 - **Riwayat percakapan tersimpan** untuk setiap sesi pengguna (disimpan di database SQLite)
-- **DeepSearch Mode** untuk mencari informasi di web menggunakan SerpAPI
+- **DeepSearch Mode** untuk pencarian lebih dalam
+- **Image generation** berbasis teks prompt
 - **Tombol "New Chat"** untuk menghapus riwayat dan memulai obrolan baru
 - **Tombol "Export Chat"** untuk mengunduh riwayat percakapan
 - **Mode Gelap & Terang** otomatis/dapat diubah manual
+- **Voice input** via rekam langsung atau unggah audio
 - **Logging terperinci** untuk debugging dan pemantauan
 - **Pembersihan otomatis riwayat** (pesan lebih dari 30 hari akan dihapus)
 - **Mudah di-deploy dan dijalankan secara lokal atau di cloud**
@@ -22,16 +24,25 @@ DEMO: **https://kybot.up.railway.app/**
 KyBot/
 │── templates/
 │   ├── index.html
+├── static/ (opsional)
+│ ├── fonts/
+│ │ └── Zyana.ttf (custom font)
+│ └── img/
+│ └── logo.png (custom logo)
 │── logs/
 │   ├── kybot.log
-│── .env (Tambahkan API Key di sini)
+│── generated/
+│   ├── (gambar yang dihasilkan)
+│── uploads/
+│   ├── (file audio sementara)
+│── .env
 │── app.py
 │── requirements.txt
-│── chat_history.db (Akan dibuat otomatis)
+│── chat_history.db (dibuat otomatis)
 │── README.md
 ```
 
-## 🛠️ Instalasi dan Menjalankan KyBot v9.0
+## 🛠️ Instalasi dan Menjalankan KyBot v10.0
 
 Ikuti langkah-langkah berikut untuk menginstal dan menjalankan chatbot ini di sistemmu.
 
@@ -58,14 +69,19 @@ pip install -r requirements.txt
 
 ### 4️⃣ Tambahkan API Key ke `.env`
 
-Buat file `.env` dan tambahkan **GROQ_API_KEY** dan **SERPAPI_KEY** (jika menggunakan DeepSearch):
+Buat file `.env` di direktori utama dan tambahkan konfigurasi berikut:
 
 ```
-GROQ_API_KEY=your_groq_api_key_here
-SERPAPI_KEY=your_serpapi_key_here # opsional, tapi diperlukan untuk DeepSearch
+GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
+SERPAPI_KEY=your_serpapi_key
 SECRET_KEY=your_secret_key
+PORT=5000
 ```
-
+- GROQ_API_KEY: Dapatkan dari Groq (diperlukan untuk fungsi chatbot).
+- GEMINI_API_KEY: Dapatkan dari Google untuk pembuatan/pengeditan gambar.
+- SERPAPI_KEY: Dapatkan dari SerpAPI untuk integrasi pencarian web.
+- SECRET_KEY: Kunci aman untuk manajemen sesi Flask.
 
 ### 5️⃣ Jalankan KyBot
 
@@ -92,10 +108,11 @@ Sekarang, buka [**http://127.0.0.1:5000**](http://127.0.0.1:5000) di browser unt
 1. Buka `Settings` → `Environment Variables`
 2. Tambahkan variabel berikut:
    ```
-   PORT=5000
-   GROQ_API_KEY=your_groq_api_key_here
-   SERPAPI_KEY=your_serpapi_key_here
+   GROQ_API_KEY=your_groq_api_key
+   GEMINI_API_KEY=your_gemini_api_key
+   SERPAPI_KEY=your_serpapi_key
    SECRET_KEY=your_secret_key
+   PORT=5000
    ```
 3. Simpan & Redeploy
 
@@ -110,15 +127,16 @@ Sekarang, buka [**http://127.0.0.1:5000**](http://127.0.0.1:5000) di browser unt
 ### 5️⃣ Akses KyBot di Railway
 
 1. Buka Railway → Tab `Settings` → `Domains`
-2. Salin URL (contoh: `https://kybot-production.up.railway.app/`)
+2. Salin URL (contoh: `https://kybot-example.up.railway.app/`)
 3. Buka di browser, dan KyBot siap digunakan!
 
-## 💡 Catatan Tambahan
+## 💡 Catatan
 
-- **Logging**: Log disimpan di folder `logs/kybot.log` dengan rotasi file (maksimum 1MB, 3 backup).
-- **Database**: Riwayat chat disimpan di `chat_history.db` menggunakan SQLite.
-- **Keamanan**: Input pengguna dibersihkan menggunakan `bleach` untuk mencegah serangan XSS.
-- **DeepSearch**: Menggunakan SerpAPI untuk pencarian web. Pastikan `SERPAPI_KEY` sudah diatur di `.env` untuk mengaktifkan fitur ini.
+- Logging: Log disimpan di logs/kybot.log dengan rotasi (maksimum 1MB, 3 cadangan) atau ditampilkan di konsol jika LOG_TO_CONSOLE=True.
+- Database: Riwayat obrolan disimpan di chat_history.db menggunakan SQLite, dengan penghapusan otomatis untuk data yang lebih tua dari 30 hari.
+- Penyimpanan Gambar: Gambar yang dihasilkan disimpan di folder generated/ dan dihapus saat memulai sesi obrolan baru.
+- Unggahan Audio: File audio sementara untuk transkripsi disimpan di folder uploads/ dan dihapus setelah diproses.
+- Keamanan: Input pengguna disanitasi menggunakan bleach untuk mencegah serangan XSS.
 
 ## 📜 Lisensi
 
