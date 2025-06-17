@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KyBot v9.0</title>
+    <title>KyBot v10.0</title>
+    <link rel="icon" href="/static/img/logo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
     <style>
@@ -302,29 +303,148 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .waveform {
+            width: 100%;
+            height: 20px;
+            margin-top: 10px;
+            display: flex;
+            gap: 4px;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .waveform div {
+            width: 4px;
+            height: 10px;
+            background-color: #3b82f6;
+            animation: wave 1s infinite ease-in-out;
+        }
+
+        .waveform div:nth-child(2) { animation-delay: 0.1s; }
+        .waveform div:nth-child(3) { animation-delay: 0.2s; }
+        .waveform div:nth-child(4) { animation-delay: 0.3s; }
+        .waveform div:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0%, 100% { height: 10px; }
+            50% { height: 20px; }
+        }
+
+        #voice-wave {
+            display: none;
+        }
+
+        .typing-loader {
+            display: inline-flex;
+            gap: 4px;
+            margin: 8px 0;
+            height: 20px;
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+
+        .typing-loader span {
+            width: 6px;
+            height: 6px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-loader span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-loader span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin: 8px 0;
+        }
+
+        .message-wrapper.user {
+            align-items: flex-end;
+        }
+
+        .chat-actions {
+            margin-top: 4px;
+            font-size: 12px;
+            display: flex;
+            gap: 10px;
+            padding-left: 6px;
+        }
+
+        .chat-actions button {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .chat-actions button:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .dark-mode .chat-actions button {
+            color: #93c5fd;
+        }
+
+            @font-face {
+            font-family: 'Zyana';
+            src: url('/static/fonts/Zyana.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        .kybot-title {
+            font-family: 'Zyana', sans-serif;
+        }
+
     </style>
 </head>
+    <!-- HTML dan JavaScript akan dilanjutkan di bawah ini -->
 <body>
     <div class="container">
         <header>
-            <h1>KyBot v9.0</h1>
-            <button onclick="toggleTheme()" class="theme-button">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="https://i.postimg.cc/sxk26W6Q/20250617-211834.png" alt="KyBot Logo" style="height: 50px;">
+                <h1 class="kybot-title">KyBot v10.0</h1>
+            </div>
+            <button onclick="toggleTheme()" class="theme-button" data-ignore-disable="true">
                 <span id="theme-icon">🌙</span>
             </button>
         </header>
         <div class="search-bar">
             <input id="search-query" type="text" placeholder="Cari teks di chat...">
-            <button onclick="searchText()">Cari</button>
-            <button onclick="clearSearch()">Clear</button>
+            <button onclick="searchText()" data-ignore-disable="true">Cari</button>
+            <button onclick="clearSearch()" data-ignore-disable="true">Clear</button>
         </div>
         <div class="button-group">
-            <button onclick="newChat()">New Chat</button>
-            <button onclick="exportChat()">Export Chat</button>
+            <button onclick="newChat()" data-ignore-disable="true">New Chat</button>
+            <button onclick="exportChat()" data-ignore-disable="true">Export Chat</button>
         </div>
         <div class="deep-search">
             <input type="checkbox" id="deep-search">
-            <label for="deep-search">Aktifkan DeepSearch Mode</label>
+            <label for="deep-search">DeepSearch Mode</label>
         </div>
+        <div style="text-align: right; font-size: 14px; margin-bottom: 4px; color: gray;" id="current-role"></div>
         <div id="chat-area" class="chat-area"></div>
         <div class="input-area">
             <textarea id="message" placeholder="Ketik pesan Anda..." rows="2"></textarea>
@@ -332,6 +452,22 @@
                 <span class="send-icon" data-feather="send"></span>
                 <span class="spinner"></span>
             </button>
+            <button id="record-btn" onclick="startRecording()" title="Rekam Audio">
+                <span class="mic-icon" data-feather="mic"></span>
+                <span class="stop-icon" data-feather="square" style="display:none;"></span>
+                <span class="spinner" style="display:none;"></span>
+            </button>
+            <input type="file" id="upload-audio" accept="audio/*" style="display:none" onchange="uploadAudio(this)">
+            <button onclick="document.getElementById('upload-audio').click()" title="Upload Audio">
+                <span data-feather="upload"></span>
+            </button>
+        </div>
+        <div class="waveform" id="voice-wave">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
         </div>
         <div id="feedback-form" style="margin-top:20px; display:none;">
             <h4>Beri Umpan Balik</h4>
@@ -356,6 +492,14 @@
                 if (themeIcon) themeIcon.innerHTML = state ? '☀️' : '🌙';
             }
 
+            fetch('/get-role')
+            .then(res => res.json())
+            .then(data => {
+                if (data.role) {
+                    document.getElementById('current-role').textContent = `Role: ${data.role.charAt(0).toUpperCase() + data.role.slice(1)}`;
+                }
+            });
+
             useDark.addEventListener('change', evt => {
                 darkModeState = evt.matches;
                 toggleDarkMode(darkModeState);
@@ -364,6 +508,8 @@
             const savedTheme = localStorage.getItem('theme');
             darkModeState = savedTheme === 'dark' || (!savedTheme && useDark.matches);
             toggleDarkMode(darkModeState);
+
+            feather.replace();
         });
 
         function toggleTheme() {
@@ -374,6 +520,26 @@
             if (themeIcon) themeIcon.innerHTML = isDark ? '☀️' : '🌙';
         }
 
+        function isImagePrompt(message) {
+            const exactQuestions = [
+                "apakah kamu bisa membuat gambar?",
+                "can you make an image?",
+                "bisa buat gambar?",
+                "?",
+                "bisa membuat gambar?"
+            ];
+
+            if (exactQuestions.includes(message.toLowerCase().trim())) return false;
+
+            const keywords = [
+                "buatkan gambar", "gambar", "lukiskan", "tampilkan gambar", "ilustrasi",
+                "draw", "create", "image of", "generate image", "create a picture", "picture of", "illustrate", "visualize"
+            ];
+
+            const lowered = message.toLowerCase();
+            return keywords.some(keyword => lowered.includes(keyword));
+        }
+
         async function sendMessage() {
             const messageInput = document.getElementById('message');
             const sendButton = document.getElementById('send-button');
@@ -381,11 +547,54 @@
             const message = messageInput.value.trim();
             if (!message) return showNotification('Pesan tidak boleh kosong.', 'error');
 
-            sendButton.disabled = true;
+            toggleAllInputs(true); // Bekukan tombol input
             sendButton.classList.add('sending');
             addMessage(message, 'user');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot-message';
+            loadingDiv.id = 'bot-loading';
+
+            loadingDiv.innerHTML = `
+            <div class="typing-loader">
+                <span></span><span></span><span></span>
+            </div>
+            `;
+
+            document.getElementById('chat-area').appendChild(loadingDiv);
+            document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
+
             chatHistory.push({ role: 'user', content: message });
             messageInput.value = '';
+
+            // Deteksi permintaan gambar
+            if (isImagePrompt(message)) {
+                try {
+                    const response = await fetch('/generate-image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: message })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error("gagal membuat gambar");
+                    }
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+
+                    document.getElementById('bot-loading')?.remove();
+
+                    addMessage(`<img src="${url}" alt="Hasil Gambar AI" style="max-width:100%; border-radius:8px;">`, 'bot');
+                } catch (err) {
+                    document.getElementById('bot-loading')?.remove();
+                    addMessage("gagal membuat gambar", 'bot');
+                    showNotification(err.message, 'error');
+                } finally {
+                    toggleAllInputs(false);
+                    sendButton.classList.remove('sending');
+                }
+                return;
+            }
+
 
             try {
                 const response = await fetch('/chat', {
@@ -399,29 +608,113 @@
                 });
                 const data = await response.json();
                 if (data.response) {
+                    document.getElementById('bot-loading')?.remove();
                     addMessage(data.response, 'bot');
                     chatHistory.push({ role: 'bot', content: data.response });
+
+                    if (data.role) {
+                        const role = data.role.trim();
+                        document.getElementById('current-role').textContent = `Role: ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+                    } else {
+                        document.getElementById('current-role').textContent = '';
+                    }
+
+                    const matchRoleConfirm = data.response.match(/(?:sekarang kamu|peranmu|kamu adalah|jadilah)\s+(?:sebagai)?\s*(\w+)/i);
+                        if (matchRoleConfirm && matchRoleConfirm[1]) {
+                            const role = matchRoleConfirm[1];
+                            document.getElementById('current-role').textContent = `Role: ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+                        }
+
                     document.getElementById('feedback-form').style.display = 'block';
                 } else {
+                    document.getElementById('bot-loading')?.remove();
                     showNotification('Gagal mendapatkan respons dari server.', 'error');
                 }
             } catch (error) {
+                document.getElementById('bot-loading')?.remove();
                 showNotification('Terjadi kesalahan: ' + error.message, 'error');
             } finally {
-                sendButton.disabled = false;
+                toggleAllInputs(false); // Aktifkan kembali tombol input
                 sendButton.classList.remove('sending');
             }
         }
 
         function addMessage(text, sender) {
             const chatArea = document.getElementById('chat-area');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${sender === 'user' ? 'user' : 'bot'}`;
+
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender === 'user' ? 'user-message' : 'bot-message'}`;
             messageDiv.setAttribute('data-original', text);
-            messageDiv.innerHTML = sender === 'bot'
-                ? `<div class="markdown-content">${marked.parse(text)}</div>`
-                : text.replace(/\n/g, '<br>');
-            chatArea.appendChild(messageDiv);
+
+            const escapedText = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+
+            if (sender === 'bot') {
+                const markdownContainer = document.createElement('div');
+                markdownContainer.className = 'markdown-content';
+                messageDiv.appendChild(markdownContainer);
+
+                if (text.includes('<img')) {
+                    markdownContainer.innerHTML = marked.parse(text);
+                } else {
+                    let index = 0;
+                    const typingInterval = 3;
+                    const typingTimer = setInterval(() => {
+                        if (index <= text.length) {
+                            const currentText = text.substring(0, index);
+                            markdownContainer.innerHTML = marked.parse(currentText);
+                            chatArea.scrollTop = chatArea.scrollHeight;
+                            index++;
+                        } else {
+                            clearInterval(typingTimer);
+                        }
+                    }, typingInterval);
+                }
+
+                wrapper.appendChild(messageDiv);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'chat-actions';
+
+                if (text.includes('<img')) {
+                    const btnDownload = document.createElement('button');
+                    btnDownload.textContent = '📥 download';
+                    btnDownload.onclick = () => {
+                        const img = messageDiv.querySelector('img');
+                        if (img) {
+                            const link = document.createElement('a');
+                            link.href = img.src;
+                            link.download = 'gambar_kybot.png';
+                            link.click();
+                        }
+                    };
+                    actionsDiv.appendChild(btnDownload);
+                } else {
+                    const btnCopy = document.createElement('button');
+                    btnCopy.textContent = '📋 copy';
+                    btnCopy.onclick = () => {
+                        navigator.clipboard.writeText(text).then(() => {
+                            showNotification('Teks disalin ke clipboard!', 'success');
+                        }).catch(() => {
+                            showNotification('Gagal menyalin teks.', 'error');
+                        });
+                    };
+                    actionsDiv.appendChild(btnCopy);
+                }
+
+                wrapper.appendChild(actionsDiv);
+            } else {
+                messageDiv.innerHTML = escapedText.replace(/\n/g, '<br>');
+                wrapper.appendChild(messageDiv);
+            }
+
+            chatArea.appendChild(wrapper);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
@@ -452,6 +745,7 @@
         }
 
         async function newChat() {
+            await fetch('/new_chat', { method: 'POST' });
             chatHistory = [];
             document.getElementById('chat-area').innerHTML = '';
             document.getElementById('feedback-form').style.display = 'none';
@@ -511,6 +805,136 @@
             a.click();
             URL.revokeObjectURL(url);
             showNotification('Riwayat chat berhasil diekspor.', 'success');
+        }
+
+        let mediaRecorder, audioChunks = [];
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                toggleRecordingUI(true);
+
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'recorded_audio.webm');
+                    toggleRecordingUI(false, true);
+                    await sendAudio(formData);
+                };
+
+                mediaRecorder.start();
+                showNotification('Perekaman dimulai. Klik ikon stop untuk berhenti.', 'success');
+                document.getElementById('record-btn').onclick = stopRecording;
+            } catch (err) {
+                showNotification('Gagal memulai perekaman: ' + err.message, 'error');
+            }
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            document.getElementById('record-btn').onclick = startRecording;
+        }
+
+        function uploadAudio(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('audio', file);
+            toggleRecordingUI(false, true);
+            sendAudio(formData);
+        }
+
+        async function sendAudio(formData) {
+            toggleAllInputs(true); // Bekukan tombol input
+
+            try {
+                const deepSearch = document.getElementById('deep-search').checked;
+                formData.append('deep_search', deepSearch ? 'true' : 'false');
+
+                const res = await fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const contentType = res.headers.get("content-type");
+
+                if (contentType && contentType.includes("image/png")) {
+                    // Jika server kirim gambar
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+
+                    addMessage("Permintaan gambar dari audio:", 'user');
+                    addMessage(`<img src="${url}" alt="Hasil Gambar AI" style="max-width:100%; border-radius:8px;">`, 'bot');
+                    chatHistory.push({ role: 'user', content: '[Audio: Permintaan Gambar]' });
+                    chatHistory.push({ role: 'bot', content: '[Gambar Terkirim]' });
+                    document.getElementById('feedback-form').style.display = 'block';
+                    return;
+                }
+
+                // Jika bukan gambar → lanjut baca JSON
+                const data = await res.json();
+
+                if (data.error) {
+                    showNotification(data.error, 'error');
+                } else {
+                    addMessage(data.transcription, 'user');
+                    chatHistory.push({ role: 'user', content: data.transcription });
+                    addMessage(data.response, 'bot');
+                    chatHistory.push({ role: 'bot', content: data.response });
+                    document.getElementById('feedback-form').style.display = 'block';
+                }
+
+            } catch (err) {
+                showNotification('Kesalahan saat mengirim audio: ' + err.message, 'error');
+            } finally {
+                toggleRecordingUI(false, false);
+                toggleAllInputs(false);
+            }
+        }
+
+        function toggleRecordingUI(recording, sending = false) {
+            const mic = document.querySelector('#record-btn .mic-icon');
+            const stop = document.querySelector('#record-btn .stop-icon');
+            const spinner = document.querySelector('#record-btn .spinner');
+            const wave = document.getElementById('voice-wave');
+
+            if (recording) {
+                mic.style.display = 'none';
+                stop.style.display = 'inline-block';
+                spinner.style.display = 'none';
+                wave.style.display = 'flex';
+            } else if (sending) {
+                mic.style.display = 'none';
+                stop.style.display = 'none';
+                spinner.style.display = 'inline-block';
+                wave.style.display = 'none';
+            } else {
+                mic.style.display = 'inline-block';
+                stop.style.display = 'none';
+                spinner.style.display = 'none';
+                wave.style.display = 'none';
+            }
+        }
+
+        function toggleAllInputs(disabled = true) {
+            const buttons = document.querySelectorAll('button');
+            const inputs = document.querySelectorAll('textarea, input[type="file"], input[type="checkbox"]');
+
+            buttons.forEach(btn => {
+                if (!btn.hasAttribute('data-ignore-disable')) {
+                    btn.disabled = disabled;
+                }
+            });
+
+            inputs.forEach(input => {
+                if (!input.hasAttribute('data-ignore-disable')) {
+                    input.disabled = disabled;
+                }
+            });
         }
     </script>
 </body>
