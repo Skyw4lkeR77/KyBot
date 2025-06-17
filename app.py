@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from werkzeug.utils import secure_filename
 
-# Setup logging
 LOG_DIR = os.path.join(os.path.dirname(__file__), 'logs')
 LOG_FILE = os.path.join(LOG_DIR, 'kybot.log')
 if not os.path.exists(LOG_DIR):
